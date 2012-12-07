@@ -1760,7 +1760,7 @@ EOP
 
         my @notIsPunct = grep {/[[:punct:]]/ and not /\p{IsPunct}/}
                                 map {chr} 0x20 .. 0x7f;
-        is(join ('', @notIsPunct), '$+<=>^`|~',
+        is(join ('', @notIsPunct), '#$%&*+<=>@^`|~',
 	   '[:punct:] disagrees with IsPunct on Symbols');
 
         my @isPrint = grep {not /[[:print:]]/ and /\p{IsPrint}/}
