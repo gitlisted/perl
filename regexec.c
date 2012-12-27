@@ -3359,7 +3359,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
             }
             else {  /* Does participate in folds */
                 AV* list = (AV*) *listp;
-                if (av_len(list) != 1) {
+                if (av_top(list) != 1) {
 
                     /* If there aren't exactly two folds to this, it is outside
                      * the scope of this function */
@@ -7197,7 +7197,7 @@ S_core_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit
 	    /* Elements 2 and 3 are either both present or both absent. [2] is
 	     * any inversion list generated at compile time; [3] indicates if
 	     * that inversion list has any user-defined properties in it. */
-	    if (av_len(av) >= 2) {
+	    if (av_top(av) >= 2) {
 		invlist = ary[2];
 		if (SvUV(ary[3])) {
                     swash_init_flags |= _CORE_SWASH_INIT_USER_DEFINED_PROPERTY;

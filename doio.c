@@ -743,7 +743,7 @@ Perl_nextargv(pTHX_ GV *gv)
     PL_filemode = 0;
     if (!GvAV(gv))
 	return NULL;
-    while (av_len(GvAV(gv)) >= 0) {
+    while (av_top(GvAV(gv)) >= 0) {
 	STRLEN oldlen;
 	sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);

@@ -4391,7 +4391,7 @@ PP(pp_aeach)
     IV *iterp = Perl_av_iter_p(aTHX_ array);
     const IV current = (*iterp)++;
 
-    if (current > av_len(array)) {
+    if (current > av_top(array)) {
 	*iterp = 0;
 	if (gimme == G_SCALAR)
 	    RETPUSHUNDEF;
@@ -4419,21 +4419,21 @@ PP(pp_akeys)
 
     if (gimme == G_SCALAR) {
 	dTARGET;
-	PUSHi(av_len(array) + 1);
+	PUSHi(av_top(array) + 1);
     }
     else if (gimme == G_ARRAY) {
-        IV n = Perl_av_len(aTHX_ array);
+        IV n = Perl_av_top(aTHX_ array) + 1;
         IV i;
 
-        EXTEND(SP, n + 1);
+        EXTEND(SP, n);
 
 	if (PL_op->op_type == OP_AKEYS || PL_op->op_type == OP_RKEYS) {
-	    for (i = 0;  i <= n;  i++) {
+	    for (i = 0;  i < n;  i++) {
 		mPUSHi(i);
 	    }
 	}
 	else {
-	    for (i = 0;  i <= n;  i++) {
+	    for (i = 0;  i < n;  i++) {
 		SV *const *const elem = Perl_av_fetch(aTHX_ array, i, 0);
 		PUSHs(elem ? *elem : &PL_sv_undef);
 	    }
@@ -5189,7 +5189,7 @@ PP(pp_reverse)
 		const MAGIC *mg;
 		bool can_preserve = SvCANEXISTDELETE(av);
 
-		for (i = 0, j = av_len(av); i < j; ++i, --j) {
+		for (i = 0, j = av_top(av); i < j; ++i, --j) {
 		    SV *begin, *end;
 
 		    if (can_preserve) {

@@ -1671,7 +1671,7 @@ Perl_do_readline(pTHX)
 	    if (IoFLAGS(io) & IOf_ARGV) {
 		if (IoFLAGS(io) & IOf_START) {
 		    IoLINES(io) = 0;
-		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
+		    if (av_top(GvAVn(PL_last_in_gv)) < 0) {
 			IoFLAGS(io) &= ~IOf_START;
 			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,NULL);
 			SvTAINTED_off(GvSVn(PL_last_in_gv)); /* previous tainting irrelevant */
@@ -2909,7 +2909,7 @@ PP(pp_aelem)
     IV elem = SvIV(elemsv);
     AV *const av = MUTABLE_AV(POPs);
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
-    const U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > av_len(av));
+    const U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > av_top(av));
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool preeminent = TRUE;
     SV *sv;

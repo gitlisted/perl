@@ -12937,7 +12937,7 @@ mod2fname(pTHX_ CV *cv)
   int max_name_len = 39;
   AV *in_array = (AV *)SvRV(ST(0));
 
-  num_entries = av_len(in_array);
+  num_entries = av_top(in_array) + 1;
 
   /* All the names start with PL_. */
   strcpy(ultimate_name, "PL_");
@@ -12946,7 +12946,7 @@ mod2fname(pTHX_ CV *cv)
   Zero(work_name, sizeof(work_name), char);
 
   /* Run through the entries and build up a working name */
-  for(counter = 0; counter <= num_entries; counter++) {
+  for(counter = 0; counter < num_entries; counter++) {
     /* If it's not the first name then tack on a __ */
     if (counter) {
       my_strlcat(work_name, "__", sizeof(work_name));

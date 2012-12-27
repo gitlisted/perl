@@ -112,7 +112,7 @@ _copy(class, x)
 
   CODE:
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
-    elems = av_len(a);			/* number of elems in array */
+    elems = av_len(a);			/* number of elems in array - 1 */
     a2 = (AV*)sv_2mortal((SV*)newAV());
     av_extend (a2, elems);		/* pre-padd */
     while (elems >= 0)

@@ -3635,7 +3635,7 @@ PP(pp_require)
 		first  = SvIV(*av_fetch(lav,0,0));
 		if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
 		    || hv_exists(MUTABLE_HV(req), "qv", 2 ) /* qv style */
-		    || av_len(lav) > 1               /* FP with > 3 digits */
+		    || av_top(lav) > 1               /* FP with > 3 digits */
 		    || strstr(SvPVX(pv),".0")        /* FP with leading 0 */
 		   ) {
 		    DIE(aTHX_ "Perl %"SVf" required--this is only "
@@ -3648,7 +3648,7 @@ PP(pp_require)
 		    SV *hintsv;
 		    I32 second = 0;
 
-		    if (av_len(lav)>=1) 
+		    if (av_top(lav)>=1)
 			second = SvIV(*av_fetch(lav,1,0));
 
 		    second /= second >= 600  ? 100 : 10;
@@ -4611,7 +4611,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	}
 	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
 	    AV * const other_av = MUTABLE_AV(SvRV(d));
-	    const I32 other_len = av_len(other_av) + 1;
+	    const I32 other_len = av_top(other_av) + 1;
 	    I32 i;
 	    HV *hv = MUTABLE_HV(SvRV(e));
 
@@ -4663,7 +4663,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	}
 	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
 	    AV * const other_av = MUTABLE_AV(SvRV(e));
-	    const I32 other_len = av_len(other_av) + 1;
+	    const I32 other_len = av_top(other_av) + 1;
 	    I32 i;
 
 	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Array\n"));

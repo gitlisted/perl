@@ -496,7 +496,7 @@ S_ithread_run(void * arg)
 
     {
         AV *params = thread->params;
-        int len = (int)av_len(params)+1;
+        int len = (int)av_top(params)+1;
         int ii;
 
         dSP;

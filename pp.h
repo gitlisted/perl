@@ -438,7 +438,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
                 int i;                                          \
                 I32 len;                                        \
                 assert(SvTYPE(tmpsv) == SVt_PVAV);              \
-                len = av_len((AV *)tmpsv) + 1;                  \
+                len = av_top((AV *)tmpsv) + 1;                  \
                 (void)POPs; /* get rid of the arg */            \
                 EXTEND(sp, len);                                \
                 for (i = 0; i < len; ++i)                       \

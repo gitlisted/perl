@@ -4628,16 +4628,16 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	}
     }
     if ( qv ) { /* quoted versions always get at least three terms*/
-	I32 len = av_len(av);
+	I32 top_index = av_top(av);
 	/* This for loop appears to trigger a compiler bug on OS X, as it
 	   loops infinitely. Yes, len is negative. No, it makes no sense.
 	   Compiler in question is:
 	   gcc version 3.3 20030304 (Apple Computer, Inc. build 1640)
-	   for ( len = 2 - len; len > 0; len-- )
+	   for ( top_index = 2 - top_index; top_index > 0; top_index-- )
 	   av_push(MUTABLE_AV(sv), newSViv(0));
 	*/
-	len = 2 - len;
-	while (len-- > 0)
+	top_index = 2 - top_index;
+	while (top_index-- > 0)
 	    av_push(av, newSViv(0));
     }
 
@@ -4727,7 +4727,7 @@ Perl_new_version(pTHX_ SV *ver)
 
 	sav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(ver), "version", FALSE)));
 	/* This will get reblessed later if a derived class*/
-	for ( key = 0; key <= av_len(sav); key++ )
+	for ( key = 0; key <= av_top(sav); key++ )
 	{
 	    const I32 rev = SvIV(*av_fetch(sav, key, FALSE));
 	    av_push(av, newSViv(rev));
@@ -4932,7 +4932,7 @@ The SV returned has a refcount of 1.
 SV *
 Perl_vnumify(pTHX_ SV *vs)
 {
-    I32 i, len, digit;
+    I32 i, top_index, digit;
     int width;
     bool alpha = FALSE;
     SV *sv;
@@ -4959,15 +4959,15 @@ Perl_vnumify(pTHX_ SV *vs)
 	return newSVpvs("0");
     }
 
-    len = av_len(av);
-    if ( len == -1 )
+    top_index = av_top(av);
+    if ( top_index == -1 )
     {
 	return newSVpvs("0");
     }
 
     digit = SvIV(*av_fetch(av, 0, 0));
     sv = Perl_newSVpvf(aTHX_ "%d.", (int)PERL_ABS(digit));
-    for ( i = 1 ; i < len ; i++ )
+    for ( i = 1 ; i < top_index ; i++ )
     {
 	digit = SvIV(*av_fetch(av, i, 0));
 	if ( width < 3 ) {
@@ -4980,14 +4980,14 @@ Perl_vnumify(pTHX_ SV *vs)
 	}
     }
 
-    if ( len > 0 )
+    if ( top_index > 0 )
     {
-	digit = SvIV(*av_fetch(av, len, 0));
+	digit = SvIV(*av_fetch(av, top_index, 0));
 	if ( alpha && width == 3 ) /* alpha version */
 	    sv_catpvs(sv,"_");
 	Perl_sv_catpvf(aTHX_ sv, "%0*d", width, (int)digit);
     }
-    else /* len == 0 */
+    else /* top_index == 0 */
     {
 	sv_catpvs(sv, "000");
     }
@@ -5013,7 +5013,7 @@ The SV returned has a refcount of 1.
 SV *
 Perl_vnormal(pTHX_ SV *vs)
 {
-    I32 i, len, digit;
+    I32 i, top_index, digit;
     bool alpha = FALSE;
     SV *sv;
     AV *av;
@@ -5029,30 +5029,30 @@ Perl_vnormal(pTHX_ SV *vs)
 	alpha = TRUE;
     av = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(vs), "version", FALSE)));
 
-    len = av_len(av);
-    if ( len == -1 )
+    top_index = av_top(av);
+    if ( top_index == -1 )
     {
 	return newSVpvs("");
     }
     digit = SvIV(*av_fetch(av, 0, 0));
     sv = Perl_newSVpvf(aTHX_ "v%"IVdf, (IV)digit);
-    for ( i = 1 ; i < len ; i++ ) {
+    for ( i = 1 ; i < top_index ; i++ ) {
 	digit = SvIV(*av_fetch(av, i, 0));
 	Perl_sv_catpvf(aTHX_ sv, ".%"IVdf, (IV)digit);
     }
 
-    if ( len > 0 )
+    if ( top_index > 0 )
     {
 	/* handle last digit specially */
-	digit = SvIV(*av_fetch(av, len, 0));
+	digit = SvIV(*av_fetch(av, top_index, 0));
 	if ( alpha )
 	    Perl_sv_catpvf(aTHX_ sv, "_%"IVdf, (IV)digit);
 	else
 	    Perl_sv_catpvf(aTHX_ sv, ".%"IVdf, (IV)digit);
     }
 
-    if ( len <= 2 ) { /* short version, must be at least three */
-	for ( len = 2 - len; len != 0; len-- )
+    if ( top_index <= 2 ) { /* short version, must be at least three */
+	for ( top_index = 2 - top_index; top_index != 0; top_index-- )
 	    sv_catpvs(sv,".0");
     }
     return sv;
@@ -5134,8 +5134,8 @@ Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
     if ( hv_exists(MUTABLE_HV(rhv), "alpha", 5 ) )
 	ralpha = TRUE;
 
-    l = av_len(lav);
-    r = av_len(rav);
+    l = av_top(lav);
+    r = av_top(rav);
     m = l < r ? l : r;
     retval = 0;
     i = 0;
