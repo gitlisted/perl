@@ -1104,7 +1104,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    HV *seenhv = NULL;
 	    AV *postav, *todumpav, *namesav;
 	    I32 level = 0;
-	    I32 indent, terse, i, imax, postlen;
+	    I32 indent, terse, i, imax, post_top_index;
 	    SV **svp;
 	    SV *val, *name, *pad, *xpad, *apad, *sep, *pair, *varname;
 	    SV *freezer, *toaster, *bless, *sortkeys;
@@ -1282,8 +1282,8 @@ Data_Dumper_Dumpxs(href, ...)
 		    if (indent >= 2 && !terse)
 			SvREFCNT_dec(newapad);
 
-		    postlen = av_len(postav);
-		    if (postlen >= 0 || !terse) {
+		    post_top_index = av_top(postav);
+		    if (post_top_index >= 0 || !terse) {
 			sv_insert(valstr, 0, 0, " = ", 3);
 			sv_insert(valstr, 0, 0, SvPVX_const(name), SvCUR(name));
 			sv_catpvn(valstr, ";", 1);
@@ -1291,15 +1291,15 @@ Data_Dumper_Dumpxs(href, ...)
 		    sv_catsv(retval, pad);
 		    sv_catsv(retval, valstr);
 		    sv_catsv(retval, sep);
-		    if (postlen >= 0) {
+		    if (post_top_index >= 0) {
 			I32 i;
 			sv_catsv(retval, pad);
-			for (i = 0; i <= postlen; ++i) {
+			for (i = 0; i <= post_top_index; ++i) {
 			    SV *elem;
 			    svp = av_fetch(postav, i, FALSE);
 			    if (svp && (elem = *svp)) {
 				sv_catsv(retval, elem);
-				if (i < postlen) {
+				if (i < post_top_index) {
 				    sv_catpvn(retval, ";", 1);
 				    sv_catsv(retval, sep);
 				    sv_catsv(retval, pad);

@@ -321,14 +321,14 @@ HUF_fix_trigger(pTHX_ SV *trigger, SV *new_id) {
 void
 HUF_fix_objects(pTHX) {
     dMY_CXT;
-    I32 i, len;
+    I32 i, top_index;
     HE* ent;
     AV* oblist = (AV*)sv_2mortal((SV*)newAV());
     hv_iterinit(MY_CXT.ob_reg);
     while((ent = hv_iternext(MY_CXT.ob_reg)))
         av_push(oblist, SvREFCNT_inc(hv_iterkeysv(ent)));
-    len = av_len(oblist);
-    for (i = 0; i <= len; ++i) {
+    top_index = av_top(oblist);
+    for (i = 0; i < top_index; ++i) {
         SV* old_id = *av_fetch(oblist, i, 0);
         SV* trigger = hv_delete_ent(MY_CXT.ob_reg, old_id, 0, 0);
         SV* obj = SvRV(trigger);

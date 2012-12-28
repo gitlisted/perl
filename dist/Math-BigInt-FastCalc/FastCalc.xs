@@ -112,7 +112,7 @@ _copy(class, x)
 
   CODE:
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
-    elems = av_len(a);			/* number of elems in array - 1 */
+    elems = av_top(a);			/* number of elems in array - 1 */
     a2 = (AV*)sv_2mortal((SV*)newAV());
     av_extend (a2, elems);		/* pre-padd */
     while (elems >= 0)
@@ -149,7 +149,7 @@ __strip_zeros(x)
 
   CODE:
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
-    elems = av_len(a);			/* number of elems in array */
+    elems = av_top(a);			/* number of elems in array - 1 */
     ST(0) = x;				/* we return x */
     if (elems == -1)
       { 
@@ -195,7 +195,7 @@ _dec(class,x)
 
   CODE:
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
-    elems = av_len(a);			/* number of elems in array */
+    elems = av_top(a);			/* number of elems in array - 1 */
     ST(0) = x;				/* we return x */
 
     MAX = XS_BASE - 1;
@@ -239,7 +239,7 @@ _inc(class,x)
 
   CODE:
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
-    elems = av_len(a);			/* number of elems in array */
+    elems = av_top(a);			/* number of elems in array - 1 */
     ST(0) = x;				/* we return x */
 
     BASE = XS_BASE;
@@ -308,7 +308,7 @@ _is_zero(class, x)
 
   CODE:
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
-    if ( av_len(a) != 0)
+    if ( av_top(a) != 0)
       {
       ST(0) = &PL_sv_no;		/* len != 1, can't be '0' */
       }
@@ -332,7 +332,7 @@ _len(class,x)
 
   CODE:
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
-    elems = av_len(a);			/* number of elems in array */
+    elems = av_top(a);			/* number of elems in array - 1 */
     temp = *av_fetch(a, elems, 0);	/* fetch last element */
     SvPV(temp, len);			/* convert to string & store length */
     len += (IV) XS_BASE_LEN * elems;
@@ -347,7 +347,8 @@ _acmp(class, cx, cy);
   INIT:
     AV* array_x;
     AV* array_y;
-    I32 elemsx, elemsy, diff;
+    I32 elemsx, elemsy; /* Number of elements in arrays -1 */
+    I32 diff;
     SV* tempx;
     SV* tempy;
     STRLEN lenx;
@@ -358,8 +359,8 @@ _acmp(class, cx, cy);
   CODE:
     array_x = (AV*)SvRV(cx);		/* ref to aray, don't check ref */
     array_y = (AV*)SvRV(cy);		/* ref to aray, don't check ref */
-    elemsx =  av_len(array_x);
-    elemsy =  av_len(array_y);
+    elemsx =  av_top(array_x);
+    elemsy =  av_top(array_y);
     diff = elemsx - elemsy;		/* difference */
 
     if (diff > 0)

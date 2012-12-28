@@ -4422,7 +4422,7 @@ PP(pp_akeys)
 	PUSHi(av_top(array) + 1);
     }
     else if (gimme == G_ARRAY) {
-        IV n = Perl_av_top(aTHX_ array) + 1;
+        IV n = av_top(array) + 1;
         IV i;
 
         EXTEND(SP, n);

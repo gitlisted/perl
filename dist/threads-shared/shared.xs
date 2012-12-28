@@ -1065,7 +1065,8 @@ sharedsv_array_mg_FETCHSIZE(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(sv);
     SHARED_EDIT;
     if (SvTYPE(ssv) == SVt_PVAV) {
-        val = av_len((AV*) ssv);
+        /* XXX */
+        val = av_top((AV*) ssv);
     } else {
         /* Not actually defined by tie API but ... */
         val = HvUSEDKEYS((HV*) ssv);

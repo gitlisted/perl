@@ -2797,7 +2797,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
                 /* this regexp is also owned by the new PL_reg_curpm, which
 		   will try to free it.  */
                 av_push(PL_regex_padav, repointer);
-                PL_reg_curpm->op_pmoffset = av_len(PL_regex_padav);
+                PL_reg_curpm->op_pmoffset = av_top(PL_regex_padav);
                 PL_regex_pad = AvARRAY(PL_regex_padav);
             }
 #endif      

@@ -4499,11 +4499,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	    I32 i;
 	    bool andedresults = TRUE;
 	    AV *av = (AV*) SvRV(d);
-	    const I32 len = av_len(av);
+	    const I32 top_index = av_top(av);
 	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-CodeRef\n"));
-	    if (len == -1)
+	    if (top_index == -1)
 		RETPUSHYES;
-	    for (i = 0; i <= len; ++i) {
+	    for (i = 0; i <= top_index; ++i) {
 		SV * const * const svp = av_fetch(av, i, FALSE);
 		DEBUG_M(Perl_deb(aTHX_ "        testing array element...\n"));
 		ENTER_with_name("smartmatch_array_elem_test");
@@ -4611,12 +4611,12 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	}
 	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
 	    AV * const other_av = MUTABLE_AV(SvRV(d));
-	    const I32 other_len = av_top(other_av) + 1;
+	    const I32 other_top_index = av_top(other_av);
 	    I32 i;
 	    HV *hv = MUTABLE_HV(SvRV(e));
 
 	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Hash\n"));
-	    for (i = 0; i < other_len; ++i) {
+	    for (i = 0; i <= other_top_index; ++i) {
 		SV ** const svp = av_fetch(other_av, i, FALSE);
 		DEBUG_M(Perl_deb(aTHX_ "        checking for key existence...\n"));
 		if (svp) {	/* ??? When can this not happen? */
@@ -4663,11 +4663,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	}
 	else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
 	    AV * const other_av = MUTABLE_AV(SvRV(e));
-	    const I32 other_len = av_top(other_av) + 1;
+	    const I32 other_top_index = av_top(other_av);
 	    I32 i;
 
 	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Array\n"));
-	    for (i = 0; i < other_len; ++i) {
+	    for (i = 0; i <= other_top_index; ++i) {
 		SV ** const svp = av_fetch(other_av, i, FALSE);
 
 		DEBUG_M(Perl_deb(aTHX_ "        testing for key existence...\n"));
@@ -4681,11 +4681,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
 	    AV *other_av = MUTABLE_AV(SvRV(d));
 	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Array\n"));
-	    if (av_len(MUTABLE_AV(SvRV(e))) != av_len(other_av))
+	    if (av_top(MUTABLE_AV(SvRV(e))) != av_top(other_av))
 		RETPUSHNO;
 	    else {
 	    	I32 i;
-	    	const I32 other_len = av_len(other_av);
+	    	const I32 other_top_index = av_top(other_av);
 
 		if (NULL == seen_this) {
 		    seen_this = newHV();
@@ -4695,7 +4695,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 		    seen_other = newHV();
 		    (void) sv_2mortal(MUTABLE_SV(seen_other));
 		}
-		for(i = 0; i <= other_len; ++i) {
+		for(i = 0; i <= other_top_index; ++i) {
 		    SV * const * const this_elem = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
 		    SV * const * const other_elem = av_fetch(other_av, i, FALSE);
 
@@ -4740,10 +4740,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	  sm_regex_array:
 	    {
 		PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
-		const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
+		const I32 this_top_index = av_top(MUTABLE_AV(SvRV(e)));
 		I32 i;
 
-		for(i = 0; i <= this_len; ++i) {
+		for(i = 0; i <= this_top_index; ++i) {
 		    SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
 		    DEBUG_M(Perl_deb(aTHX_ "        testing element against pattern...\n"));
 		    if (svp && matcher_matches_sv(matcher, *svp)) {
@@ -4757,11 +4757,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	}
 	else if (!SvOK(d)) {
 	    /* undef ~~ array */
-	    const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
+	    const I32 this_top_index = av_top(MUTABLE_AV(SvRV(e)));
 	    I32 i;
 
 	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Undef-Array\n"));
-	    for (i = 0; i <= this_len; ++i) {
+	    for (i = 0; i <= this_top_index; ++i) {
 		SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
 		DEBUG_M(Perl_deb(aTHX_ "        testing for undef element...\n"));
 		if (!svp || !SvOK(*svp))
@@ -4773,10 +4773,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	  sm_any_array:
 	    {
 		I32 i;
-		const I32 this_len = av_len(MUTABLE_AV(SvRV(e)));
+		const I32 this_top_index = av_top(MUTABLE_AV(SvRV(e)));
 
 		DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Array\n"));
-		for (i = 0; i <= this_len; ++i) {
+		for (i = 0; i <= this_top_index; ++i) {
 		    SV * const * const svp = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
 		    if (!svp)
 			continue;
