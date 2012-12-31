@@ -3396,6 +3396,12 @@ call, or call a constructor from the FileHandle package.
 (W unopened) You tried to invoke a file test operator on a filehandle
 that isn't open.  Check your control flow.  See also L<perlfunc/-X>.
 
+=item Only byte strings can be mapped into in-memory filehandles
+
+(W utf8) You tried to open a reference to a scalar for read or append
+where the scalar contained character codes over 0xFF.  In-memory files
+model on-disk files and can only contain bytes.
+
 =item oops: oopsAV
 
 (S internal) An internal warning that the grammar is screwed up.
