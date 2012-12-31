@@ -448,7 +448,6 @@ my $byte_warning = "Only byte strings can be mapped into in-memory filehandles\n
     seek($fh, 1, SEEK_SET);
     ok((print $fh "A"), "print to an upgraded byte string");
     seek($fh, 1, SEEK_SET);
-    local $TODO = "write to utf8 flagged strings is broken";
     is($content, "\xA1A\xA3", "check result");
 
     $content = "\x{101}\x{102}\x{103}";

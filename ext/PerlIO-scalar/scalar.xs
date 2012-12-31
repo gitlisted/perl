@@ -184,6 +184,12 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	SvGETMAGIC(sv);
 	if (!SvROK(sv)) sv_force_normal(sv);
 	if (SvOK(sv)) SvPV_force_nomg_nolen(sv);
+	if (SvUTF8(sv) && !sv_utf8_downgrade(sv, TRUE)) {
+	    if (ckWARN(WARN_UTF8))
+	        Perl_warner(aTHX_ packWARN(WARN_UTF8), "Only byte strings can be mapped into in-memory filehandles\n");
+	    SETERRNO(EINVAL, SS_IVCHAN);
+	    return 0;
+	}
 	if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND) {
 	    dst = SvGROW(sv, SvCUR(sv) + count + 1);
 	    offset = SvCUR(sv);
