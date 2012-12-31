@@ -151,6 +151,17 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	STRLEN len;
 	I32 got;
 	p = SvPV(sv, len);
+	if (SvUTF8(sv)) {
+	    if (sv_utf8_downgrade(sv, TRUE)) {
+	        p = SvPV_nomg(sv, len);
+	    }
+	    else {
+	        if (ckWARN(WARN_UTF8))
+		    Perl_warner(aTHX_ packWARN(WARN_UTF8), "Only byte strings can be mapped into in-memory filehandles\n");
+	        SETERRNO(EINVAL, SS_IVCHAN);
+	        return -1;
+	    }
+	}
 	got = len - (STRLEN)(s->posn);
 	if (got <= 0)
 	    return 0;
