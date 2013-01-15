@@ -8007,7 +8007,7 @@ EOM
 			;;
 		*)  case "$osname" in
 	                darwin) dflt='none' ;;
-			linux*|svr4*|esix*|solaris|nonstopux) dflt='-fPIC' ;;
+			*linux*|svr4*|esix*|solaris|nonstopux) dflt='-fPIC' ;;
 			*)	dflt='-fpic' ;;
 		    esac ;;
 	    esac ;;
@@ -8092,7 +8092,7 @@ EOM
 			      '') dflt="$dflt +vnocompatwarnings" ;;
 			      esac
 			      ;;
-			linux*|irix*|gnu*)  dflt="-shared $optimize" ;;
+			*linux*|irix*|gnu*)  dflt="-shared $optimize" ;;
 			next)  dflt='none' ;;
 			solaris) dflt='-G' ;;
 			sunos) dflt='-assert nodefinitions' ;;
@@ -8103,6 +8103,7 @@ EOM
     *) dflt="$lddlflags" ;;
     esac
 
+    : Should we only do this if its gcc/linux? 
     if $test "X$sysroot" != X; then
         dflt="$dflt --sysroot $sysroot"
     fi
@@ -8153,7 +8154,7 @@ say "none".
 EOM
     case "$ccdlflags" in
     '') case "$osname" in
-	    linux*|hpux|gnu*)	dflt='-Wl,-E' ;;
+	    *linux*|hpux|gnu*)	dflt='-Wl,-E' ;;
 	    next|sunos)	dflt='none' ;;
 	    *)		dflt='none' ;;
 	    esac ;;
@@ -8286,7 +8287,7 @@ true)
 			dflt=libperl.5.$so
 			# XXX How handle the --version stuff for MAB?
 			;;
-		linux*|gnu*)  # ld won't link with a bare -lperl otherwise.
+		*linux*|gnu*)  # ld won't link with a bare -lperl otherwise.
 			dflt=libperl.$so
 			;;
 		cygwin*) # ld links now against the dll directly
