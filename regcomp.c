@@ -8321,6 +8321,9 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, bool complement_b)
 #define REGTAIL_STUDY(x,y,z) regtail((x),(y),(z),depth+1)
 #endif
 
+/* Returns NULL, setting *flagp to TRYAGAIN at the end of (?) that only sets
+   flags. Otherwise would only return NULL if regbranch() returns NULL, which
+   cannot happen.  */
 STATIC regnode *
 S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
@@ -8868,7 +8871,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     REGTAIL(pRExC_state, ret, reganode(pRExC_state, IFTHEN, 0));
                     br = regbranch(pRExC_state, &flags, 1,depth+1);
 		    if (br == NULL)
-			br = reganode(pRExC_state, LONGJMP, 0);
+                        FAIL("panic: regbranch returned NULL");
 		    else
                         REGTAIL(pRExC_state, br, reganode(pRExC_state, LONGJMP, 0));
 		    c = *nextchar(pRExC_state);
@@ -8878,7 +8881,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		        if (is_define) 
 		            vFAIL("(?(DEFINE)....) does not allow branches");
 			lastbr = reganode(pRExC_state, IFTHEN, 0); /* Fake one for optimizer. */
-                        regbranch(pRExC_state, &flags, 1,depth+1);
+                        if (!regbranch(pRExC_state, &flags, 1,depth+1))
+                            FAIL("panic: regbranch returned NULL");
                         REGTAIL(pRExC_state, ret, lastbr);
 		 	if (flags&HASWIDTH)
 			    *flagp |= HASWIDTH;
@@ -9128,7 +9132,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     /*     branch_len = (paren != 0); */
 
     if (br == NULL)
-	return(NULL);
+        FAIL("panic: regbranch returned NULL");
     if (*RExC_parse == '|') {
 	if (!SIZE_ONLY && RExC_extralen) {
 	    reginsert(pRExC_state, BRANCHJ, br, depth+1);
@@ -9168,7 +9172,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
         br = regbranch(pRExC_state, &flags, 0, depth+1);
 
 	if (br == NULL)
-	    return(NULL);
+            FAIL("panic: regbranch returned NULL");
         REGTAIL(pRExC_state, lastbr, br);               /* BRANCH -> BRANCH. */
 	lastbr = br;
 	*flagp |= flags & (SPSTART | HASWIDTH | POSTPONED);
@@ -9325,6 +9329,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
  - regbranch - one alternative of an | operator
  *
  * Implements the concatenation operator.
+ *
+ * would only return NULL if regpiece() returns NULL, which cannot happen.
  */
 STATIC regnode *
 S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
@@ -9364,7 +9370,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 	if (latest == NULL) {
 	    if (flags & TRYAGAIN)
 		continue;
-	    return(NULL);
+            FAIL("panic: regpiece returned NULL");
 	}
 	else if (ret == NULL)
 	    ret = latest;
@@ -9398,6 +9404,9 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
  * both the endmarker for their branch list and the body of the last branch.
  * It might seem that this node could be dispensed with entirely, but the
  * endmarker role is not redundant.
+ *
+ * Returns NULL, setting *flagp to TRYAGAIN if regatom() returns NULL with
+ * TRYAGAIN.
  */
 STATIC regnode *
 S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
@@ -9428,6 +9437,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     if (ret == NULL) {
 	if (flags & TRYAGAIN)
 	    *flagp |= TRYAGAIN;
+        else
+            FAIL("panic: regatom returned NULL without setting TRYAGAIN");
 	return(NULL);
     }
 
@@ -10048,6 +10059,9 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, I32
    escape sequences, with the one for handling literal escapes requiring
    a dummy entry for all of the special escapes that are actually handled
    by the other.
+
+   Returns NULL, setting *flagp to TRYAGAIN if reg() returns NULL with
+   TRYAGAIN.  Otherwise does not return NULL.
 */
 
 STATIC regnode *
@@ -10131,7 +10145,7 @@ tryagain:
 		    }
 		    goto tryagain;
 		}
-		return(NULL);
+                FAIL("panic: reg returned NULL without setting TRYAGAIN");
 	}
 	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
 	break;
@@ -11766,7 +11780,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * corresponding bit set if that character is in the list.  For characters
      * above 255, a range list or swash is used.  There are extra bits for \w,
      * etc. in locale ANYOFs, as what these match is not determinable at
-     * compile time */
+     * compile time
+     *
+     * Never returns NULL.
+     */
 
     dVAR;
     UV prevvalue = OOB_UNICODE, save_prevvalue = OOB_UNICODE;
