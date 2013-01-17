@@ -6648,13 +6648,13 @@ sub unbalanced {
 
     # I hate using globals!
     $balanced_brace_re ||= qr{
-        ^ \{
+        ^ {
              (?:
                  (?> [^{}] + )              # Non-parens without backtracking
                 |
                  (??{ $balanced_brace_re }) # Group with matching parens
               ) *
-          \} $
+          } $
    }x;
     return $_[0] !~ m/$balanced_brace_re/;
 } ## end sub unbalanced

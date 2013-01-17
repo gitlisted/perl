@@ -5770,7 +5770,7 @@ Perl_yylex(pTHX)
 		}
 		sv = newSVpvn_flags(s, len, UTF ? SVf_UTF8 : 0);
 		if (*d == '(') {
-		    d = scan_str(d,TRUE,TRUE,FALSE);
+		    d = scan_str(d,TRUE,TRUE,FALSE, FALSE);
 		    if (!d) {
 			/* MUST advance bufptr here to avoid bogus
 			   "at end of line" context messages from yyerror().
@@ -6675,7 +6675,7 @@ Perl_yylex(pTHX)
 	TERM(THING);
 
     case '\'':
-	s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
@@ -6690,7 +6690,7 @@ Perl_yylex(pTHX)
 	TERM(sublex_start());
 
     case '"':
-	s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
@@ -6713,7 +6713,7 @@ Perl_yylex(pTHX)
 	TERM(sublex_start());
 
     case '`':
-	s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	DEBUG_T( { printbuf("### Saw backtick string before %s\n", s); } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Backticks",s);
@@ -8172,7 +8172,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_PIPE_OP,XTERM);
 
 	case KEY_q:
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	    if (!s)
 		missingterm(NULL);
 	    pl_yylval.ival = OP_CONST;
@@ -8183,7 +8183,7 @@ Perl_yylex(pTHX)
 
 	case KEY_qw: {
 	    OP *words = NULL;
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	    if (!s)
 		missingterm(NULL);
 	    PL_expect = XOPERATOR;
@@ -8233,7 +8233,7 @@ Perl_yylex(pTHX)
 	}
 
 	case KEY_qq:
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	    if (!s)
 		missingterm(NULL);
 	    pl_yylval.ival = OP_STRINGIFY;
@@ -8246,7 +8246,7 @@ Perl_yylex(pTHX)
 	    TERM(sublex_start());
 
 	case KEY_qx:
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	    if (!s)
 		missingterm(NULL);
 	    readpipe_override();
@@ -8567,7 +8567,7 @@ Perl_yylex(pTHX)
 		    const bool warnillegalproto = ckWARN(WARN_ILLEGALPROTO);
                     STRLEN tmplen;
 
-		    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+		    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 		    if (!s)
 			Perl_croak(aTHX_ "Prototype not terminated");
 		    /* strip spaces and check for bad characters */
@@ -9506,7 +9506,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
 {
     dVAR;
     PMOP *pm;
-    char *s = scan_str(start,!!PL_madskills,FALSE, PL_reg_state.re_reparsing);
+    char *s = scan_str(start,!!PL_madskills,FALSE, PL_reg_state.re_reparsing, TRUE);
     const char * const valid_flags =
 	(const char *)((type == OP_QR) ? QR_PAT_MODS : M_PAT_MODS);
     char charset = '\0';    /* character set modifier */
@@ -9609,7 +9609,7 @@ S_scan_subst(pTHX_ char *start)
 
     pl_yylval.ival = OP_NULL;
 
-    s = scan_str(start,!!PL_madskills,FALSE,FALSE);
+    s = scan_str(start,!!PL_madskills,FALSE,FALSE, FALSE);
 
     if (!s)
 	Perl_croak(aTHX_ "Substitution pattern not terminated");
@@ -9627,7 +9627,7 @@ S_scan_subst(pTHX_ char *start)
 #endif
 
     first_start = PL_multi_start;
-    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
     if (!s) {
 	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
@@ -9713,7 +9713,7 @@ S_scan_trans(pTHX_ char *start)
 
     pl_yylval.ival = OP_NULL;
 
-    s = scan_str(start,!!PL_madskills,FALSE,FALSE);
+    s = scan_str(start,!!PL_madskills,FALSE,FALSE, FALSE);
     if (!s)
 	Perl_croak(aTHX_ "Transliteration pattern not terminated");
 
@@ -9729,7 +9729,7 @@ S_scan_trans(pTHX_ char *start)
     }
 #endif
 
-    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
     if (!s) {
 	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
@@ -10178,7 +10178,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 
     if (d - PL_tokenbuf != len) {
 	pl_yylval.ival = OP_GLOB;
-	s = scan_str(start,!!PL_madskills,FALSE,FALSE);
+	s = scan_str(start,!!PL_madskills,FALSE,FALSE, FALSE);
 	if (!s)
 	   Perl_croak(aTHX_ "Glob not terminated");
 	return s;
@@ -10305,6 +10305,7 @@ intro_sym:
    calls scan_str().  s/// makes yylex() call scan_subst() which calls
    scan_str().  tr/// and y/// make yylex() call scan_trans() which
    calls scan_str().
+   XXX
 
    It skips whitespace before the string starts, and treats the first
    character as the delimiter.  If the delimiter is one of ([{< then
@@ -10320,7 +10321,9 @@ intro_sym:
 */
 
 STATIC char *
-S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
+S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
+        bool deprecate_escaped_matching
+        )
 {
     dVAR;
     SV *sv;			/* scalar value: string */
@@ -10334,6 +10337,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
     U8 termstr[UTF8_MAXBYTES];	/* terminating string */
     STRLEN termlen;		/* length of terminating string */
     int last_off = 0;		/* last position for nesting bracket */
+    char *escaped_open = NULL;
 #ifdef PERL_MAD
     int stuffstart;
     char *tstart;
@@ -10379,6 +10383,14 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
 	termcode = termstr[0] = term = tmps[5];
 
     PL_multi_close = term;
+
+    if (keep_quoted == 2 && PL_multi_open == PL_multi_close) {
+        keep_quoted = cBOOL(PL_madskills);
+    }
+
+    if (PL_multi_open == PL_multi_close || ! ckWARN_d(WARN_DEPRECATED)) {
+        deprecate_escaped_matching = FALSE;
+    }
 
     /* create a new SV to hold the contents.  79 is the SV's initial length.
        What a random number. */
@@ -10518,13 +10530,27 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
 		if (*s == '\\' && s+1 < PL_bufend) {
 		    if (!keep_quoted &&
 			((s[1] == PL_multi_open) || (s[1] == PL_multi_close)))
+                    {
 			s++;
+			if (deprecate_escaped_matching) {
+                            if (*s == PL_multi_open) {
+                                escaped_open = s;
+                            }
+                            else if (escaped_open) {
+                                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                                    "Don't escape matching %c%c within a %c%c-delimited pattern",
+                                     PL_multi_open, PL_multi_close,
+                                     PL_multi_open, PL_multi_close);
+                                escaped_open = NULL;
+                            }
+                        }
+                    }
 		    else
 			*to++ = *s++;
 		}
 		/* allow nested opens and closes */
 		else if (*s == PL_multi_close && --brackets <= 0)
-		    break;
+                    break;
 		else if (*s == PL_multi_open)
 		    brackets++;
 		else if (!has_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)

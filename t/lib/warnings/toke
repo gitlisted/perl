@@ -1306,3 +1306,15 @@ sub { # do not actually call require
   require a::b + 1; # ambiguity warnings.
 }
 EXPECT
+########
+# toke.c
+# [perl #XXX] Erroneous ambiguity warnings
+print "aa" =~ m{^a\{1,2\}$}, "\n";
+print "aa" =~ m{^a{1,2}$}, "\n";
+no warnings 'deprecated';
+print "aa" =~ m{^a\{1,2\}$}, "\n";
+EXPECT
+Don't escape matching {} within a {}-delimited pattern at - line 3.
+1
+1
+1

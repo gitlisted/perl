@@ -1746,6 +1746,20 @@ something that isn't defined yet, you don't actually have to define the
 subroutine or package before the current location.  You can use an empty
 "sub foo;" or "package FOO;" to enter a "forward" declaration.
 
+=item Don't escape matching %c%c within a %c%c-delimited pattern
+
+(D deprecated) You wrote a regular expression pattern something like
+this:
+ 
+ m{foo\{bar\}baz}
+
+The backslashes are unnecessary; instead write
+ 
+ m{foo{bar}baz}
+
+It is planned that a future Perl release will change the meaning of what
+the backslashes mean here, hence this warning to change your code. 
+
 =item dump() better written as CORE::dump()
 
 (W misc) You used the obsolescent C<dump()> built-in function, without fully
